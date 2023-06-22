@@ -9,6 +9,7 @@ public class CellManager : MonoBehaviour
     public GameObject XIcon;
     public GameObject OIcon;
     public Enums.CellState State;
+    public Enums.CellState FakeState;
 
     // Start is called before the first frame update
     void Start()
@@ -16,6 +17,7 @@ public class CellManager : MonoBehaviour
         XIcon.SetActive(false);
         OIcon.SetActive(false);
         State = Enums.CellState.Empty;
+        FakeState = Enums.CellState.Empty;
     }
 
     public void IconChange(Enums.CellState state)
@@ -34,5 +36,6 @@ public class CellManager : MonoBehaviour
             XIcon.SetActive(false);
             OIcon.SetActive(false);
         }
+        FakeState = State;
     }
 }

@@ -92,8 +92,8 @@ public class GamesManager : MonoBehaviour
             return;
         }
         cells[cell].GetComponent<CellManager>().IconChange(Enums.CellState.X);
-        GameSettings.turn = Enums.Turn.Computer;
         StateCheck();
+        GameSettings.turn = Enums.Turn.Computer;
     }
 
     public void StateCheck()

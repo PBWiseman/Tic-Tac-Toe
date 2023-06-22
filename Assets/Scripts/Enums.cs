@@ -20,9 +20,9 @@ public class Enums : MonoBehaviour
 
     public enum Winner
     {
-        Player, //0
-        Computer, //1
+        None, //0    
+        Player, //1
         Draw, //2
-        None, //3    
+        Computer, //3
     }
 }
