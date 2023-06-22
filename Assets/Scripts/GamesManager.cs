@@ -1,14 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GamesManager : MonoBehaviour
 {
     public GameObject[] cells;
     public Enums.Winner winner;
+    public Text EndText;
+    public static GamesManager Instance;
     // Start is called before the first frame update
     void Start()
     {
+        Instance = this;
         GameSettings.turn = Enums.Turn.Player;
         winner = Enums.Winner.None;
     }
@@ -16,11 +22,30 @@ public class GamesManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameSettings.turn == Enums.Turn.Computer) //This just doesnt check the cases if it isnt the players turn so they cant double move
+        if (GameSettings.turn == Enums.Turn.None)
         {
-            return;
+            switch (winner)
+            {
+                case Enums.Winner.Player:
+                    EndText.text = "You win!";
+                    break;
+                case Enums.Winner.Computer:
+                    EndText.text = "You lose.";
+                    break;
+                case Enums.Winner.Draw:
+                    EndText.text = "Tie!";
+                    break;
+            }
         }
-        //This is ugly but it works. Gets the key pressed and stores the cell array position I want. If multiple pressed gets the latest one.
+        if (GameSettings.turn == Enums.Turn.Player)
+        {
+            playerTurn();
+        }
+    }
+
+    private void playerTurn()
+    {
+        //This is ugly but it works. Gets the key pressed and stores the cell array position I want. If multiple pressed gets the highest numbered one.
         int cell;
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -62,37 +87,33 @@ public class GamesManager : MonoBehaviour
         {
             return;
         }
+        if (cells[cell].GetComponent<CellManager>().State != Enums.CellState.Empty) //This returns if the cell already has something in it
+        {
+            return;
+        }
         cells[cell].GetComponent<CellManager>().IconChange(Enums.CellState.X);
-        StateCheck();
         GameSettings.turn = Enums.Turn.Computer;
+        StateCheck();
     }
 
     public void StateCheck()
     {
         drawCheck(); //This is called first so that if all cells are filled but someone wins it will set winner to draw and then to the actual winner
         winCheck();
-        switch (winner)
+        if (winner != Enums.Winner.None)
         {
-            case Enums.Winner.Player:
-                Debug.Log("Player wins");
-                break;
-            case Enums.Winner.Computer:
-                Debug.Log("CPU wins");
-                break;
-            case Enums.Winner.Draw:
-                Debug.Log("Draw");
-                break;
+            GameSettings.turn = Enums.Turn.None;
         }
     }
 
     private void winCheck() //Checks if a win
     {
-        //Checks all possible sets
+        //Checks all possible sets. Could be done more efficiently.
         match(0,1,2);
         match(3,4,5);
         match(6,7,8);
 
-        match(0,3,4);
+        match(0,3,6);
         match(1,4,7);
         match(2,5,8);
 

@@ -8,6 +8,7 @@ public class Enums : MonoBehaviour
     {
         Player, //0
         Computer, //1
+        None, //2
     }
 
     public enum CellState
