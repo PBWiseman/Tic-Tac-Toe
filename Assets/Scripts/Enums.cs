@@ -16,4 +16,12 @@ public class Enums : MonoBehaviour
         X, //1
         O, //2
     }
+
+    public enum Winner
+    {
+        Player, //0
+        Computer, //1
+        Draw, //2
+        None, //3    
+    }
 }
