@@ -16,31 +16,20 @@ public class CellManager : MonoBehaviour
         OIcon.SetActive(false);
     }
 
-
-    public void IconChange(char activate)
+    public void IconChange(Enums.CellState state)
     {
-        if (activate == 'X')
+        if (state == Enums.CellState.X)
         {
             XIcon.SetActive(true);
         }
-        else if (activate == 'O')
+        else if (state == Enums.CellState.O)
         {
             OIcon.SetActive(true);
         }
-        else if (activate == 'E')
+        else if (state == Enums.CellState.Empty)
         {
             XIcon.SetActive(false);
             OIcon.SetActive(false);
         }
-        else 
-        {
-            Debug.Log("Error. Wrong char:");
-            Debug.Log(activate);
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        Debug.Log("Mouse Click Detected");
     }
 }
