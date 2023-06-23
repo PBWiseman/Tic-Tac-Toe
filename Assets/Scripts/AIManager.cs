@@ -9,7 +9,6 @@ public class AIManager : MonoBehaviour
     private int bestMove;
     private int bestMoveScore;
     public int maxDepth = 4;
-    private Enums.Winner fakeWinner;
     public static AIManager Instance;
 
     // Start is called before the first frame update
@@ -25,14 +24,13 @@ public class AIManager : MonoBehaviour
 
     public void AIMove()
     {
-        fakeWinner = Enums.Winner.None;
         bestMove = 9; //Impossible move. Will be changed
         bestMoveScore = int.MinValue;
         CalculateMinMax(maxDepth, true);
         cells[bestMove].GetComponent<CellManager>().IconChange(Enums.CellState.O);
     }
 
-    private int CalculateMinMax(int depth, bool max)
+    private int CalculateMinMax(int depth, bool max) //I have no idea why this isn't working.
     {
         if (depth == 0)
         {
@@ -97,20 +95,19 @@ public class AIManager : MonoBehaviour
 
     private int evaluate()
     {
-        fakeDraw(); //Checks if all cells are filled. If so it will be a draw if not set to someone winning
+        Enums.Winner fakeWinner = Enums.Winner.None;
+        fakeWinner = fakeDraw(); //Checks if all cells are filled. If so it will be a draw if not set to someone winning
         //Checks all possible fake sets.
-        fakeMatch(0,1,2);
-        fakeMatch(3,4,5);
-        fakeMatch(6,7,8);
+        fakeWinner = fakeMatch(0,1,2,fakeWinner);
+        fakeWinner = fakeMatch(3,4,5,fakeWinner);
+        fakeWinner = fakeMatch(6,7,8,fakeWinner);
 
-        fakeMatch(0,3,6);
-        fakeMatch(1,4,7);
-        fakeMatch(2,5,8);
+        fakeWinner = fakeMatch(0,3,6,fakeWinner);
+        fakeWinner = fakeMatch(1,4,7,fakeWinner);
+        fakeWinner = fakeMatch(2,5,8,fakeWinner);
 
-        fakeMatch(0,4,8);
-        fakeMatch(2,4,6);
-
-
+        fakeWinner = fakeMatch(0,4,8,fakeWinner);
+        fakeWinner = fakeMatch(2,4,6,fakeWinner);   
         switch (fakeWinner)
         {
             case Enums.Winner.Player:
@@ -139,32 +136,36 @@ public class AIManager : MonoBehaviour
         return tempMoves;
     }
 
-    private void fakeMatch(int cell1, int cell2, int cell3)
+    private Enums.Winner fakeMatch(int cell1, int cell2, int cell3, Enums.Winner currentWinner)
     {
-        if (cells[cell1].GetComponent<CellManager>().FakeState == Enums.CellState.X &&
-         cells[cell2].GetComponent<CellManager>().FakeState == Enums.CellState.X &&
-         cells[cell3].GetComponent<CellManager>().FakeState == Enums.CellState.X) //This checks if the three inputted cells all show X
+        if (currentWinner == Enums.Winner.None || currentWinner == Enums.Winner.Draw) //If there hasn't already been a winner found
         {
-            fakeWinner = Enums.Winner.Player;
+            if (cells[cell1].GetComponent<CellManager>().FakeState == Enums.CellState.X &&
+            cells[cell2].GetComponent<CellManager>().FakeState == Enums.CellState.X &&
+            cells[cell3].GetComponent<CellManager>().FakeState == Enums.CellState.X) //This checks if the three inputted cells all show X
+            {
+                return Enums.Winner.Player;
+            }
+            else if (cells[cell1].GetComponent<CellManager>().FakeState == Enums.CellState.O &&
+            cells[cell2].GetComponent<CellManager>().FakeState == Enums.CellState.O &&
+            cells[cell3].GetComponent<CellManager>().FakeState == Enums.CellState.O) //This checks if the three inputted cells all show 0
+            {
+                return Enums.Winner.Computer;
+            }
         }
-        else if (cells[cell1].GetComponent<CellManager>().FakeState == Enums.CellState.O &&
-         cells[cell2].GetComponent<CellManager>().FakeState == Enums.CellState.O &&
-         cells[cell3].GetComponent<CellManager>().FakeState == Enums.CellState.O) //This checks if the three inputted cells all show 0
-        {
-            fakeWinner = Enums.Winner.Computer;
-        }
+        return currentWinner;
     }
 
-    private void fakeDraw()
+    private Enums.Winner fakeDraw()
     {
         foreach(GameObject cell in cells)
         {
             if (cell.GetComponent<CellManager>().FakeState == Enums.CellState.Empty) //If any cells are empty it plays on
             {
-                return;
+                return Enums.Winner.None;
             }
         }
-        fakeWinner = Enums.Winner.Draw;
+        return Enums.Winner.Draw;
     }
 
 
