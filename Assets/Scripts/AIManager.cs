@@ -53,7 +53,7 @@ public class AIManager : MonoBehaviour
                     maxScore = score;
                 }
 
-                if (score >= bestMoveScore && depth == maxDepth)
+                if (score > bestMoveScore && depth == maxDepth)
                 {
                     bestMoveScore = score;
                     bestMove = move;
