@@ -41,6 +41,12 @@ public class GamesManager : MonoBehaviour
         {
             playerTurn();
         }
+        else if (GameSettings.turn == Enums.Turn.Computer)
+        {
+            AIManager.Instance.AIMove();
+            GameSettings.turn = Enums.Turn.Player;
+            StateCheck();
+        }
     }
 
     private void playerTurn()
@@ -92,8 +98,8 @@ public class GamesManager : MonoBehaviour
             return;
         }
         cells[cell].GetComponent<CellManager>().IconChange(Enums.CellState.X);
-        StateCheck();
         GameSettings.turn = Enums.Turn.Computer;
+        StateCheck();
     }
 
     public void StateCheck()

@@ -7,55 +7,57 @@ public class AIManager : MonoBehaviour
     public GameObject[] cells; 
     private Stack<int> moveStack = new Stack<int>();
     private int bestMove;
+    private int bestMoveScore;
     public int maxDepth = 4;
     private Enums.Winner fakeWinner;
+    public static AIManager Instance;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        Instance = this;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(GameSettings.turn == Enums.Turn.Computer)
-        {
-            fakeWinner = Enums.Winner.None;
-            bestMove = 0;
-            CalculateMinMax(maxDepth, true);
-            cells[bestMove].GetComponent<CellManager>().IconChange(Enums.CellState.O);
-            GameSettings.turn = Enums.Turn.Player;
-            GamesManager.Instance.StateCheck();
-        }
     }
 
-    private Enums.Winner CalculateMinMax(int depth, bool max)
+    public void AIMove()
+    {
+        fakeWinner = Enums.Winner.None;
+        bestMove = 9; //Impossible move. Will be changed
+        bestMoveScore = int.MinValue;
+        CalculateMinMax(maxDepth, true);
+        cells[bestMove].GetComponent<CellManager>().IconChange(Enums.CellState.O);
+    }
+
+    private int CalculateMinMax(int depth, bool max)
     {
         if (depth == 0)
         {
-            evaluate();
-            return fakeWinner;
+            return evaluate();
         }
         if (max)
         {
-            Enums.Winner maxScore = Enums.Winner.Player;
+            int maxScore = int.MinValue;
             List<int> moves = GetMoves();
             foreach(int move in moves)
             {
                 moveStack.Push(move);
 
                 fakeMove(move, Enums.CellState.O);
-                Enums.Winner tempWinner = CalculateMinMax(depth -1, false);
+                int score = CalculateMinMax(depth - 1, false);
                 undoFakeMove();
 
-                if (tempWinner > maxScore)
+                if (score > maxScore)
                 {
-                    maxScore = tempWinner;
+                    maxScore = score;
                 }
 
-                if (tempWinner > fakeWinner && depth == maxDepth)
+                if (score >= bestMoveScore && depth == maxDepth)
                 {
+                    bestMoveScore = score;
                     bestMove = move;
                 }
             }
@@ -63,24 +65,23 @@ public class AIManager : MonoBehaviour
         }
         else
         {
-            Enums.Winner minScore = Enums.Winner.Computer;
+            int minScore = int.MaxValue;
             List<int> moves = GetMoves();
             foreach(int move in moves)
             {
                 moveStack.Push(move);
 
                 fakeMove(move, Enums.CellState.X);
-                Enums.Winner tempWinner = CalculateMinMax(depth -1, false);
+                int score = CalculateMinMax(depth -1, false);
                 undoFakeMove();
 
-                if (tempWinner < minScore)
+                if (score < minScore)
                 {
-                    minScore = tempWinner;
+                    minScore = score;
                 }
-                return minScore;
             }
+            return minScore;
         }
-        return Enums.Winner.None;
     }
 
     private void fakeMove(int cell, Enums.CellState enter)
@@ -94,8 +95,9 @@ public class AIManager : MonoBehaviour
         cells[tempMove].GetComponent<CellManager>().FakeState = Enums.CellState.Empty;
     }
 
-    private void evaluate()
+    private int evaluate()
     {
+        fakeDraw(); //Checks if all cells are filled. If so it will be a draw if not set to someone winning
         //Checks all possible fake sets.
         fakeMatch(0,1,2);
         fakeMatch(3,4,5);
@@ -107,6 +109,21 @@ public class AIManager : MonoBehaviour
 
         fakeMatch(0,4,8);
         fakeMatch(2,4,6);
+
+
+        switch (fakeWinner)
+        {
+            case Enums.Winner.Player:
+                return -1;
+            case Enums.Winner.Draw:
+                return 0;
+            case Enums.Winner.None:
+                return 1;
+            case Enums.Winner.Computer:
+                return 2;
+            default:
+                return 999; //This is just here so I dont get an error about missing return paths. Should never be used.
+        }
     }
 
     private List<int> GetMoves()
@@ -137,5 +154,18 @@ public class AIManager : MonoBehaviour
             fakeWinner = Enums.Winner.Computer;
         }
     }
+
+    private void fakeDraw()
+    {
+        foreach(GameObject cell in cells)
+        {
+            if (cell.GetComponent<CellManager>().FakeState == Enums.CellState.Empty) //If any cells are empty it plays on
+            {
+                return;
+            }
+        }
+        fakeWinner = Enums.Winner.Draw;
+    }
+
 
 }
